@@ -1,4 +1,4 @@
-// uses init.fishmon.h and bounds.fishmon.c
+/home/megan/harm/harmgit/run2/test1/imagesmall.mp4// uses init.fishmon.h and bounds.fishmon.c
 // See also coord.c, init.tools.c, and restart.c if changes to header/dumpfile
 // For thickdisk7->fishmon(new):
 // a) must change TRACKVPOT->0.  If doing zakamskabig,then use some large-box versions of parameters given by WHICHPROBLEM==THICKDISK case.
@@ -354,7 +354,7 @@ int init_global(void)
 
 #if(WHICHPROBLEM==NORMALTORUS || WHICHPROBLEM==KEPDISK)
   /* output choices */
-  tf = 2000.0;
+  tf = 20000.0;
 #elif(WHICHPROBLEM==THICKDISK)
   /* output choices */
   tf = 1.3E4*2.0;
@@ -717,8 +717,13 @@ int init_dsandvels_thindisk(int *whichvel, int*whichcoord, int i, int j, int k, 
     z = r*cos(th) ;
     S = 1./(H*H*nz) ;
     cs = H*nz ;
-
-    rho = (S/sqrt(2.*M_PI*H*H)) * exp(-z*z/(2.*H*H)) * taper_func(R,rin) ;
+    
+    //If statement added by Megan 4/10/14 to test sign of B in movie produced by makemovie
+    if((r>11) && (r<12) && (th>1.3) && (th<1.4)){
+      rho = 2.*(S/sqrt(2.*M_PI*H*H)) * exp(-z*z/(2.*H*H)) * taper_func(R,rin) ;
+    else {
+      rho = (S/sqrt(2.*M_PI*H*H)) * exp(-z*z/(2.*H*H)) * taper_func(R,rin) ;
+    }
     u = rho*cs*cs/(gam - 1.) ;
     ur = 0. ;
     uh = 0. ;

@@ -34,7 +34,7 @@ then
 fi
 if [ $whichmodel -eq 3 ]
 then
-    modelname="run"
+    modelname="run2"
 fi
 
 #################################################
@@ -83,10 +83,10 @@ fi
 
 if [ $system -eq 4 ]
 then
-    joninterpcodedir=/home/mavara/Research/Programs/harm/harmgit/
-    basedir=/home/mavara/Research/Programs/harm/harmgit/$modelname/
-    iinterpprogname=~/bin/iinterp
-    bin2txtprogname=~/bin/bin2txt
+    joninterpcodedir=/home/megan/harm/harmgit/
+    basedir=/home/megan/harm/harmgit/$modelname/
+    iinterpprogname=$basedir/iinterp
+    bin2txtprogname=$basedir/bin2txt
 
     # get needed v5d files
     cd $basedir/
@@ -131,7 +131,7 @@ fi
 # 3) make program itself (need Intel MKL -- modify makefile if path needs to be changed -- currently setup for ki-rh39)
 
 make superclean ; make prepiinterp ; make iinterp &> make.log
-
+cp iinterp $iinterpprogname
 # also make bin2txt program:
 
 make superclean ; make prepbin2txt ; make bin2txt
@@ -143,7 +143,7 @@ make superclean ; make prepbin2txt ; make bin2txt
 ######################################################
 # 4) copy programs to your path
 
-cp iinterp $iinterpprogname
+
 cp bin2txt $bin2txtprogname
 
 
@@ -158,7 +158,7 @@ fi
 # 0=NEWER header with 32 entries (tilted sims)
 # 1=OLDER header with 30 entries (thickdisk/sasha sims)
 # 2=VERYOLD header with 21 entries (runlocaldipole3dfiducial)
-OLDERHEADER=0
+OLDERHEADER=1
 
 # REQUIRED FILES:
 # 1) ensure dumps contains fieldline files
@@ -183,7 +183,7 @@ then
 fi
 if [ $whichmodel -eq 3 ]
 then
-    dumpnum=0002
+    dumpnum=7033
 fi
 
 
@@ -428,7 +428,7 @@ then
 fi
 if [ $system -eq 4 ]
 then
-    iinterpprogname=~/bin/iinterp # default
+    iinterpprogname=$basedir/iinterp # default
 fi
 
 
@@ -788,7 +788,7 @@ basescript=fulltiltmovie.tcl
 
 
 # do create script, no harm done.
-DOCREATESCRIPT=1
+DOCREATESCRIPT=0
 
 
 if [ $DOCREATESCRIPT -eq 1 ]

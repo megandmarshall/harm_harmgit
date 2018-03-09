@@ -12,11 +12,13 @@
 # choose which type of code/system setup
 #system=1   # lustre and reduced code on orange
 #system=2   # ki-rh42
-system=3   # NICS Nautilus
+#system=3   # NICS Nautilus
+system=4
 
 #whichmodel=0 # runlocal
 #whichmodel=1 # sashaa9b100t0.6
-whichmodel=2 # sashaa99t1.5708
+#whichmodel=2 # sashaa99t1.5708
+whichmodel=3
 
 if [ $whichmodel -eq 0 ]
 then
@@ -29,6 +31,10 @@ fi
 if [ $whichmodel -eq 2 ]
 then
     modelname="sashaa99t1.5708"
+fi
+if [ $whichmodel -eq 3 ]
+then
+    modelname="run"
 fi
 
 #################################################
@@ -55,6 +61,30 @@ if [ $system -eq 3 ]
 then
     joninterpcodedir=/lustre/medusa/jmckinne/harmgit.verylatest/harmgit/
     basedir=/lustre/medusa/jmckinne/data3/jmckinne/jmckinne/$modelname/
+    iinterpprogname=~/bin/iinterp
+    bin2txtprogname=~/bin/bin2txt
+
+    # get needed v5d files
+    cd $basedir/
+
+    # THIS file:
+    # scp jon@ki-rh42.slac.stanford.edu:/data/jon/harmgit/docs/howtouse_joninterp.sh . ; scp jon@ki-rh42.slac.stanford.edu:/data/jon/harmgit/docs/loopjoninterp.sh . ; scp jon@ki-rh42.slac.stanford.edu:/data/jon/harmgit/batches/batch.loopjoninterp .
+
+    DOSCP=0
+    if [ $DOSCP -eq 1 ]
+    then
+	scp jon@ki-rh42.slac.stanford.edu:/data/jon/v5dfield/head*.v5d .
+	scp jon@ki-rh42.slac.stanford.edu:/data/jon/v5dfield/*.tcl  .  
+	scp jon@ki-rh42.slac.stanford.edu:/data/jon/v5dfield/*.set  .
+	scp jon@ki-rh42.slac.stanford.edu:/data/jon/v5dfield/*.save  .  
+	scp jon@ki-rh42.slac.stanford.edu:/data/jon/v5dfield/*.SAVE  .  
+    fi
+fi
+
+if [ $system -eq 4 ]
+then
+    joninterpcodedir=/home/megan/harm/harmgit/
+    basedir=/home/megan/harm/harmgit/$modelname/
     iinterpprogname=~/bin/iinterp
     bin2txtprogname=~/bin/bin2txt
 
@@ -151,11 +181,14 @@ if [ $whichmodel -eq 2 ]
 then
     dumpnum=5736
 fi
+if [ $whichmodel -eq 3 ]
+then
+    dumpnum=0002
+fi
 
 
 # in case dumpnum has 0 in front, avoid bash interpretation as octal
 decidumpnum=`echo $(( 10#$dumpnum ))`
-
 
 echo "dumpnum=$dumpnum and decidumpnum=$decidumpnum"
 
@@ -193,6 +226,10 @@ nt=1
 nx=`head -1 dumps/fieldline$dumpnum.bin |awk '{print $2}'`
 ny=`head -1 dumps/fieldline$dumpnum.bin |awk '{print $3}'`
 nz=`head -1 dumps/fieldline$dumpnum.bin |awk '{print $4}'`
+echo "nx = $nx "  #mavara: for testing
+echo "ny = $ny "
+echo "nz = $nz "
+
 if [ $OLDERHEADER -eq 0 ]
 then
     numcolumns=`head -1 dumps/fieldline$dumpnum.bin |awk '{print $32}'`
@@ -242,7 +279,7 @@ fi
 # Vectors are still in order as columns as vx, vy, vz for true x,y,z, respectively
 #
 
-whichres=0
+whichres=3
 #whichres=1
 #whichres=2
 
@@ -265,6 +302,12 @@ then
     boxnx=512
     boxny=512
     boxnz=512
+fi
+if [ $whichres -eq 3 ]
+then
+    boxnx=64
+    boxny=64
+    boxnz=64
 fi
 
 if [ 1 -eq 1 ]
@@ -314,14 +357,15 @@ docurrent=0
 
 
 cd $basedir
-IDUMPDIR=$basedir/idumps/
+IDUMPDIR=$basedir/idumps
 # ensure coordparms.dat exists here -- required to read in harm internal grid parameters
 mkdir $IDUMPDIR
 #
 #
 # operating locally:
 if [ $system -eq 1 ] ||
-    [ $system -eq 2 ]
+    [ $system -eq 2 ] ||
+    [ $system -eq 4 ]
 then
 #
 if [ $whichmodel -eq 0 ]
@@ -335,6 +379,10 @@ fi
 if [ $whichmodel -eq 2 ]
 then
     gdumpname=./dumps/gdump.bin.sashaa99t1.5708
+fi
+if [ $whichmodel -eq 3 ]
+then
+    gdumpname=./dumps/gdump.bin
 fi
 
 else
@@ -375,6 +423,10 @@ fi
 
 # override if no change to iinterp file and (e.g.) latest
 if [ $system -eq 3 ]
+then
+    iinterpprogname=~/bin/iinterp # default
+fi
+if [ $system -eq 4 ]
 then
     iinterpprogname=~/bin/iinterp # default
 fi
@@ -767,7 +819,7 @@ vis5d $outfilename.v5d -mbs 1000 -geometry ${resx}x${resy} -script $outfilename.
 fi
 
 
-DORUNSCRIPT2=1
+DORUNSCRIPT2=0
 
 if [ $DORUNSCRIPT2 -eq 1 ]
 then
@@ -779,7 +831,7 @@ then
 ln -s $outfilename.v5d currentout.$dumpnum.v5d
 #~/bin/vis5d currentout.$dumpnum.v5d -mbs 2802 -geometry 1600x1600 -verylarge 0 -offscreen -script 3dtry.tcl
 
-if [ $system -eq 3 ]
+if [ $system -eq 4 ]   #mavara: changed 4 from 3
 then
     # on Nautilus in batch (even interactive) must use Xvfb -ac :2 & as in loopjoninterp.sh
     ~/bin/vis5d currentout.$dumpnum.v5d -mbs 2802 -geometry 1600x1600 -verylarge 0 -offscreen -framebuffer localhost:2  -script $outfilename.v5d.3dtry.tcl
@@ -788,8 +840,11 @@ else
     ~/bin/vis5d currentout.$dumpnum.v5d -mbs 2802 -geometry 1600x1600 -verylarge 0 -offscreen  -script $outfilename.v5d.3dtry.tcl
 fi
 
-
 fi
+
+ln -s $outfilename.v5d currentout.$dumpnum.v5d
+~/bin/vis5d currentout.$dumpnum.v5d -mbs 2802 -geometry 1600x1600 -verylarge 0
+
 
 
 
